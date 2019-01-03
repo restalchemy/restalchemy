@@ -95,7 +95,10 @@ validators = {
 
 def validate(value, column):
     """Check if `value` is a valid sqlalchemy type for `column`."""
-    validator = validators.get(column.type.__class__)
+    try:
+        validator = validators.get(column.type.__class__)
+    except Exception:
+        return value
     if validator and value is not None:
         return validator(column, value)
     return value
