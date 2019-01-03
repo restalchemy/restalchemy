@@ -58,6 +58,7 @@ def includeme(config: Configurator):
     rest_config = RestalchemyConfig(**options)
     config.registry.restalchemy = rest_config
 
+    config.include(".sanity")  # Add sanity tween
     config.include(".model")
     config.include(".renderer")
     config.include(".request")

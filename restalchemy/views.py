@@ -1,4 +1,3 @@
-from hashlib import md5
 from json.decoder import JSONDecodeError
 
 from pyramid.config import Configurator
@@ -12,7 +11,6 @@ from .exceptions import (
     AttributeNotFound,
     AttributeWrong,
     Forbidden,
-    InvalidJson,
     ModelNotFound,
     ResourceNotFound,
     Unauthorized,
@@ -135,15 +133,10 @@ def model_attribute_GET(request: Request):
 
 def models_POST(request: Request):
     """Create a new resource from json body."""
-    try:  # Verify json first
-        req_json = request.json
-    except JSONDecodeError:
-        raise InvalidJson
-
     Model = request.matchdict["Model"]
     model = Model()
     data = model.__before_create__(request)
-    data = data or req_json
+    data = data or request.json
     model._update_from_json(request, data=data, is_create=True)
     request.dbsession.add(model)
     # Flush so we get an ID for our resource
@@ -177,15 +170,10 @@ def model_attribute_POST(request: Request):
     else:
         raise AttributeWrong(f"{attr_name} is not in 1-n or n-m relation to {model_name}.")
 
-    try:  # Verify json first
-        req_json = request.json
-    except JSONDecodeError:
-        raise InvalidJson
-
     RelationModel = r.mapper.class_
     rel_attr = RelationModel()
     data = rel_attr.__before_create__(request)
-    data = data or req_json
+    data = data or request.json
     rel_attr._update_from_json(request, data=data, is_create=True)
     rel_attr.__after_create__(request)
     attr = getattr(model, attr_name)
@@ -200,12 +188,8 @@ def model_PUT(request: Request):
     """Update resource from json body."""
 
     model = model_GET(request)
-    try:  # Verify json first
-        req_json = request.json
-    except JSONDecodeError:
-        raise InvalidJson
     data = model.__before_update__(request)
-    data = data or req_json
+    data = data or request.json
     model._update_from_json(request, data=data, is_update=True)
     model.__after_update__(request)
     return model
@@ -236,13 +220,9 @@ def model_attribute_PUT(request: Request):
     else:
         raise AttributeWrong(f"{attr_name} is not in n-1 or 1-1 relation to {model_name}.")
 
-    try:  # Verify json first
-        req_json = request.json
-    except JSONDecodeError:
-        raise InvalidJson
     attr = getattr(model, attr_name)
     data = attr.__before_update__(request)
-    data = data or req_json
+    data = data or request.json
     attr._update_from_json(request, data=data, is_update=True)
     attr.__after_update__(request)
     model.__after_attribute_update__(request, attr)
