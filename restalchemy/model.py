@@ -1,3 +1,4 @@
+import logging
 from functools import partial
 from json.decoder import JSONDecodeError
 from typing import Optional, Set
@@ -6,6 +7,9 @@ from pyramid.config import Configurator
 from pyramid.request import Request
 
 from .exceptions import AttributeNotFound, AttributeReadOnly, InvalidJson
+
+
+log = logging.getLogger("restalchemy")
 
 
 class RestalchemyBase:
@@ -256,7 +260,12 @@ class RestalchemyBase:
     ):
         """Set all writable attributes back to it's database default value."""
         for attr in self._get_writable_attributes(request, is_create, is_update):
-            a = getattr(self.__class__, attr).default
+            try:
+                a = getattr(self.__class__, attr).default
+            except AttributeError:
+                # FIXME: relationships
+                log.warning(f"No 'default' attribute for attr: {self.__class__.__name__}.{attr}")
+                continue
             if a is None:
                 a = getattr(self.__class__, attr).server_default
             if a is not None:
