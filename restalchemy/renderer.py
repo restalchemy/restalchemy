@@ -54,14 +54,14 @@ def get_attributes(
     if exclude is None:
         exclude = []
     if hasattr(model, "__json_exclude__"):
-        exclude = [e for e in model.__json_exclude__ if e not in expand] + exclude
+        exclude += [e for e in model.__json_exclude__ if e not in expand]
     if private is None:
         private = []
     if hasattr(model, "__json_private__"):
-        exclude += model.__json_private__ + exclude + private
+        private += model.__json_private__
 
-        exclude = getattr(model, "__json_exclude__", [])
-    exclude += getattr(model, "__json_private__", [])
+    exclude += private
+
     # Returned attributes are included minus excluded attributes
     return [a for a in include if a not in exclude]
 
