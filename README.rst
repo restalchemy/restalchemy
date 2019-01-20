@@ -105,7 +105,6 @@ For questions and general discussion, join our
 For feature requests or bug reports open a
 `GitHub issue <https://github.com/restalchemy/restalchemy/issues>`_.
 
-
 Check the `website <https://www.restalchemy.org>`_ for updates.
 
 .. _Pyramid: https://trypyramid.com
